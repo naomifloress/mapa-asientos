@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f5f5f5;
+}
+
+h1{
+margin-top:20px;
+}
+
+#stage{
+width:85%;
+margin:20px auto;
+padding:20px;
+background:#222;
+color:white;
+font-size:22px;
+font-weight:bold;
+border-radius:10px;
+}
+
+#reset{
+position:absolute;
+top:20px;
+right:30px;
+padding:10px 16px;
+}
+
+#headers{
+display:flex;
+justify-content:center;
+gap:220px;
+font-weight:bold;
+margin-top:10px;
+}
+
+#counts{
+display:flex;
+justify-content:center;
+gap:240px;
+margin-bottom:20px;
+font-size:18px;
+}
+
+#map{
+display:flex;
+justify-content:center;
+gap:80px;
+overflow:auto;
+touch-action:pan-x pan-y pinch-zoom;
+}
+
+.block{
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+.row{
+display:flex;
+align-items:center;
+margin:6px 0;
+}
+
+.label{
+width:25px;
+text-align:right;
+margin-right:6px;
+font-weight:bold;
+}
+
+.labelRight{
+width:25px;
+margin-left:6px;
+font-weight:bold;
+}
+
+.seat{
+width:40px;
+height:40px;
+border-radius:50%;
+border:none;
+margin:4px;
+background:#2ecc71;
+}
+
+.server{
+background:#d4b106;
+}
+
+.disability{
+background:#2a7de1;
+}
+
+#total{
+margin-top:40px;
+margin-bottom:120px;
+font-size:20px;
+font-weight:bold;
+}
+
+#blocksHeader{
+display:flex;
+justify-content:center;
+gap:80px;
+margin:auto;
+width:85%;
+}
+
+.blockTitle{
+flex:1;
+display:flex;
+flex-direction:column;
+align-items:center;
+text-align:center;
+}
+
+#darkToggle{
+position:absolute;
+top:20px;
+left:30px;
+padding:10px 16px;
+}
+
+.dark{
+background:#121212;
+color:white;
+}
+
+.dark #map{
+background:#121212;
+}
+.dark #stage{
+background:#f5f5dc;
+color:black;
+}
+
+.dark .seat{
+border:1px solid #444;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<button id="reset" onclick="adminReset()">Reiniciar auditorio</button>
+
+<h1>Mapa de asientos</h1>
+
+<button id="darkToggle">Modo oscuro</button>
+
+<div id="stage">ESCENARIO</div>
+
+<div id="blocksHeader">
+
+<div class="blockTitle">
+<div>Bloque 1</div>
+<div id="b1">0</div>
+</div>
+
+<div class="blockTitle">
+<div>Bloque 2</div>
+<div id="b2">0</div>
+</div>
+
+<div class="blockTitle">
+<div>Bloque 3</div>
+<div id="b3">0</div>
+</div>
+
+</div>
+
+<div id="map">
+<div class="block" id="block0"></div>
+<div class="block" id="block1"></div>
+<div class="block" id="block2"></div>
+</div>
+
+<div id="total">Total disponible: ...</div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+const firebaseConfig={
+apiKey:"AIzaSyBsLMWxxJhWewdcejN2ebErWtGOjaENDgY",
+authDomain:"calvary-b837f.firebaseapp.com",
+databaseURL:"https://calvary-b837f-default-rtdb.firebaseio.com",
+projectId:"calvary-b837f",
+storageBucket:"calvary-b837f.appspot.com",
+messagingSenderId:"285026134045",
+appId:"1:285026134045:web:89d29e2c4ee7b6e006fef4"
+}
+
+const adminPassword="calvary123"
+const app=initializeApp(firebaseConfig)
+const db=getDatabase(app)
+
+const layout=[
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[6,8,7],
+[3,8,7]
+]
+
+const letters="ABCDEFGHIJ".split("")
+
+let seats=[]
+
+layout.forEach((row,r)=>{
+
+row.forEach((count,b)=>{
+
+let block=document.getElementById("block"+b)
+
+let rowDiv=document.createElement("div")
+rowDiv.className="row"
+
+if(b==0){
+
+let label=document.createElement("div")
+label.className="label"
+label.innerText=letters[r]
+rowDiv.appendChild(label)
+
+}
+
+for(let s=0;s<count;s++){
+
+let id=`${r}-${b}-${s}`
+
+let seat=document.createElement("button")
+seat.className="seat"
+
+if(r==9 && b<2) seat.classList.add("server")
+if(r==9 && b==2) seat.classList.add("disability")
+
+seat.onclick=()=>toggleSeat(id)
+
+rowDiv.appendChild(seat)
+
+seats.push({id,seat,b})
+
+}
+
+if(b==2){
+
+let label=document.createElement("div")
+label.className="labelRight"
+label.innerText=letters[r]
+rowDiv.appendChild(label)
+
+}
+
+block.appendChild(rowDiv)
+
+})
+
+})
+
+function toggleSeat(id){
+
+const seatRef=ref(db,"seats/"+id)
+
+onValue(seatRef,(snap)=>{
+
+let val=snap.val()||0
+set(seatRef,val?0:1)
+
+},{onlyOnce:true})
+
+}
+
+onValue(ref(db,"seats"),(snap)=>{
+
+let data=snap.val()||{}
+
+let occupied=0
+let blocks=[0,0,0]
+
+seats.forEach(s=>{
+
+let val=data[s.id]
+
+if(val){
+
+s.seat.style.background="red"
+occupied++
+
+}else{
+
+if(s.seat.classList.contains("server")) s.seat.style.background="#d4b106"
+else if(s.seat.classList.contains("disability")) s.seat.style.background="#2a7de1"
+else s.seat.style.background="#2ecc71"
+
+blocks[s.b]++
+
+}
+
+})
+
+document.getElementById("b1").innerText=blocks[0]
+document.getElementById("b2").innerText=blocks[1]
+document.getElementById("b3").innerText=blocks[2]
+
+document.getElementById("total").innerText="Total disponible: "+(seats.length-occupied)
+
+})
+
+window.adminReset=function(){
+
+let pass=prompt("Contraseña administrador")
+
+if(pass===adminPassword){
+
+if(confirm("Reiniciar auditorio?")){
+set(ref(db,"seats"),{})
+}
+
+}else{
+
+alert("Solo administrador puede reiniciar")
+
+}
+
+}
+
+const darkBtn=document.getElementById("darkToggle")
+
+darkBtn.onclick=()=>{
+
+document.body.classList.toggle("dark")
+
+}
+
+</script>
+
+</body>
+</html>
