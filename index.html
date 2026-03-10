@@ -28,13 +28,6 @@ font-weight:bold;
 border-radius:10px;
 }
 
-#reset{
-position:absolute;
-top:20px;
-right:30px;
-padding:10px 16px;
-}
-
 #headers{
 display:flex;
 justify-content:center;
@@ -124,13 +117,6 @@ align-items:center;
 text-align:center;
 }
 
-#darkToggle{
-position:absolute;
-top:20px;
-left:30px;
-padding:10px 16px;
-}
-
 .dark{
 background:#121212;
 color:white;
@@ -157,17 +143,32 @@ transform-origin:top center;
 
 }
 
+#topBar{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:20px;
+margin-top:20px;
+flex-wrap:wrap;
+}
+
+#topBar button{
+padding:10px 16px;
+}
+
 </style>
 
 </head>
 
-<body>
+<div id="topBar">
 
-<button id="reset" onclick="adminReset()">Reiniciar auditorio</button>
+<button id="darkToggle">Modo oscuro</button>
 
 <h1>Mapa de asientos</h1>
 
-<button id="darkToggle">Modo oscuro</button>
+<button id="reset" onclick="adminReset()">Reiniciar auditorio</button>
+
+</div>
 
 <div id="stage">ESCENARIO</div>
 
