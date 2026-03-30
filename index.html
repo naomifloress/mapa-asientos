@@ -237,6 +237,9 @@ const letters="ABCDEFGHIJKL".split("")
 
 let seats=[]
 
+let isTouching = false
+let lastState = null
+
 layout.forEach((row,r)=>{
 
 row.forEach((count,b)=>{
@@ -275,6 +278,7 @@ let id=`${r}-${b}-${s}`
 
 let seat=document.createElement("button")
 seat.className="seat"
+seat.dataset.id = id
 
 // BLOQUE 1 (K y L amarillos)
 if(b===0 && (r===10 || r===11)){
@@ -291,7 +295,43 @@ if(b===2 && r===9){
 seat.classList.add("disability")
 }
 
+// click normal (computadora)
 seat.onclick=()=>toggleSeat(id)
+
+// TOUCH (celular / ipad)
+seat.addEventListener("touchstart",(e)=>{
+e.preventDefault()
+isTouching = true
+
+const seatRef=ref(db,"seats/"+id)
+
+onValue(seatRef,(snap)=>{
+let val=snap.val()||0
+let newVal = val ? 0 : 1
+lastState = newVal
+set(seatRef,newVal)
+},{onlyOnce:true})
+
+})
+
+seat.addEventListener("touchmove",(e)=>{
+if(!isTouching) return
+
+const touch = e.touches[0]
+const element = document.elementFromPoint(touch.clientX, touch.clientY)
+
+if(element && element.classList.contains("seat")){
+let seatId = element.dataset.id
+
+if(seatId){
+set(ref(db,"seats/"+seatId), lastState)
+}
+}
+})
+
+seat.addEventListener("touchend",()=>{
+isTouching = false
+})
 
 rowDiv.appendChild(seat)
 
