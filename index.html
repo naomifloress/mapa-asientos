@@ -240,11 +240,6 @@ let seats=[]
 layout.forEach((row,r)=>{
 
 row.forEach((count,b)=>{
-
-// ocultar filas K y L en bloque 2 y 3
-if(b !== 0 && (r === 10 || r === 11)){
-return;
-}
   
 // BLOQUE 1
 if(b===0 && r===10){ // K
@@ -253,6 +248,11 @@ count = 6
 
 if(b===0 && r===11){ // L
 count = 3
+}
+
+// ocultar filas K y L en bloque 2 y 3
+if(b !== 0 && (r === 10 || r === 11)){
+return;
 }
 
 let block=document.getElementById("block"+b)
