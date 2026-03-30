@@ -241,11 +241,12 @@ layout.forEach((row,r)=>{
 
 row.forEach((count,b)=>{
 
-if(b===0 && r===11){ // fila I
+// BLOQUE 1
+if(b===0 && r===10){ // K
 count = 6
 }
 
-if(b===0 && r===12){ // fila J
+if(b===0 && r===11){ // L
 count = 3
 }
 
@@ -270,8 +271,20 @@ let id=`${r}-${b}-${s}`
 let seat=document.createElement("button")
 seat.className="seat"
 
-if(r==9 && b<2) seat.classList.add("server")
-if(r==9 && b==2) seat.classList.add("disability")
+// BLOQUE 1 (K y L amarillos)
+if(b===0 && (r===10 || r===11)){
+seat.classList.add("server")
+}
+
+// BLOQUE 2 (J amarillo)
+if(b===1 && r===9){
+seat.classList.add("server")
+}
+
+// BLOQUE 3 (J azul)
+if(b===2 && r===9){
+seat.classList.add("disability")
+}
 
 seat.onclick=()=>toggleSeat(id)
 
