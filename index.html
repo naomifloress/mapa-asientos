@@ -219,18 +219,16 @@ const app=initializeApp(firebaseConfig)
 const db=getDatabase(app)
 
 const layout=[
-[7,8,7], // A
-[7,8,7], // B
-[7,8,7], // C
-[7,8,7], // D
-[7,8,7], // E
-[7,8,7], // F
-[7,8,7], // G
-[7,8,7], // H
-[7,8,7], // I
-[7,8,7], // J
-[6,8,7], // K
-[3,8,7]  // L
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
+[7,8,7],
 ]
 
 const letters="ABCDEFGHIJKL".split("")
@@ -240,7 +238,14 @@ let seats=[]
 layout.forEach((row,r)=>{
 
 row.forEach((count,b)=>{
-  
+
+  // modificar solo bloque 1
+if(b===0 && r===8){
+count = 6
+}
+
+if(b===0 && r===9){
+count = 3
 }
 
 let block=document.getElementById("block"+b)
