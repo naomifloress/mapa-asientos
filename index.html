@@ -241,6 +241,10 @@ layout.forEach((row,r)=>{
 
 row.forEach((count,b)=>{
 
+  // ajustar solo bloque 1
+if(b===0){
+  if(r===8) count=6; // fila I
+  if(r===9) count=3; // fila J
 }
 
 let block=document.getElementById("block"+b)
